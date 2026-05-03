@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Niklas · Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #f5f0e8;
+      --surface:   #faf6ee;
+      --card:      #ede5d0;
+      --border:    #d4c9b0;
+      --accent:    #c4a870;
+      --text:      #2c2318;
+      --muted:     #8a7660;
+      --faint:     #a08c70;
+      --tag-warm-bg:  #e8d5b0; --tag-warm-fg:  #6b4f28;
+      --tag-green-bg: #d4e8c8; --tag-green-fg: #3b5e2a;
+      --tag-blue-bg:  #c8d8e8; --tag-blue-fg:  #2a4060;
+      --tag-red-bg:   #e8ccc8; --tag-red-fg:   #6b2a28;
+      --dot-ok:   #7ab05a;
+      --dot-warn: #c8923a;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2.5rem 2rem 3rem;
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    /* ── Grain overlay ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    body > * { position: relative; z-index: 1; }
+
+    /* ── Fade-in animation ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .fade { animation: fadeUp 0.5s ease both; }
+    .fade:nth-child(1) { animation-delay: 0s; }
+    .fade:nth-child(2) { animation-delay: 0.07s; }
+    .fade:nth-child(3) { animation-delay: 0.14s; }
+    .fade:nth-child(4) { animation-delay: 0.21s; }
+    .fade:nth-child(5) { animation-delay: 0.28s; }
+    .fade:nth-child(6) { animation-delay: 0.35s; }
+
+    /* ── Header ── */
+    .header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 2.25rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .header h1 {
+      font-family: 'Lora', serif;
+      font-size: 30px;
+      font-weight: 400;
+      letter-spacing: -0.4px;
+      line-height: 1.2;
+    }
+    .header h1 em {
+      font-style: italic;
+      color: var(--muted);
+    }
+    .header .sub {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 5px;
+      font-weight: 300;
+    }
+    .date-pill {
+      font-size: 12px;
+      color: var(--muted);
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 6px 14px;
+      border-radius: 20px;
+      white-space: nowrap;
+      margin-top: 4px;
+    }
+
+    /* ── Section label ── */
+    .label {
+      font-size: 10.5px;
+      font-weight: 500;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.8rem;
+    }
+
+    /* ── Quick stats ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 10px;
+      margin-bottom: 2.25rem;
+    }
+    .stat {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+    }
+    .stat-lbl { font-size: 11px; color: var(--muted); margin-bottom: 5px; }
+    .stat-val {
+      font-family: 'Lora', serif;
+      font-size: 21px;
+      font-weight: 400;
+      line-height: 1.1;
+    }
+    .stat-note { font-size: 10px; color: var(--faint); margin-top: 3px; }
+    .dot {
+      display: inline-block;
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      margin-right: 4px;
+      vertical-align: middle;
+    }
+    .ok   { background: var(--dot-ok); }
+    .warn { background: var(--dot-warn); }
+
+    /* ── Page cards ── */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+      gap: 12px;
+      margin-bottom: 2.25rem;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      padding: 20px 18px;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      transition: background 0.15s, border-color 0.15s, transform 0.15s;
+    }
+    .card:hover {
+      background: #f0e8d4;
+      border-color: var(--accent);
+      transform: translateY(-3px);
+    }
+    .card-icon { font-size: 24px; margin-bottom: 12px; line-height: 1; }
+    .card-title {
+      font-family: 'Lora', serif;
+      font-size: 15.5px;
+      font-weight: 400;
+      margin-bottom: 5px;
+    }
+    .card-desc {
+      font-size: 11.5px;
+      color: var(--muted);
+      line-height: 1.55;
+      font-weight: 300;
+      flex: 1;
+    }
+    .tag {
+      display: inline-block;
+      margin-top: 12px;
+      font-size: 10px;
+      font-weight: 500;
+      padding: 3px 9px;
+      border-radius: 20px;
+      width: fit-content;
+    }
+    .tw { background: var(--tag-warm-bg);  color: var(--tag-warm-fg); }
+    .tg { background: var(--tag-green-bg); color: var(--tag-green-fg); }
+    .tb { background: var(--tag-blue-bg);  color: var(--tag-blue-fg); }
+    .tr { background: var(--tag-red-bg);   color: var(--tag-red-fg); }
+
+    .card-add {
+      border-style: dashed;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      cursor: default;
+      opacity: 0.55;
+    }
+    .card-add .card-title { color: var(--muted); font-size: 14px; }
+
+    /* ── Lobo section ── */
+    .lobo-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 22px;
+      margin-bottom: 2.25rem;
+    }
+    .lobo-head {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+    .lobo-avatar {
+      width: 54px; height: 54px;
+      border-radius: 50%;
+      background: var(--card);
+      border: 2px solid var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px;
+      flex-shrink: 0;
+    }
+    .lobo-name {
+      font-family: 'Lora', serif;
+      font-size: 19px;
+      font-weight: 400;
+    }
+    .lobo-breed { font-size: 12px; color: var(--muted); font-weight: 300; margin-top: 2px; }
+
+    .lobo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 8px;
+    }
+    .lobo-item {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 11px 13px;
+    }
+    .lobo-key {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 5px;
+    }
+    .lobo-val { font-size: 13px; color: var(--text); }
+    .editable {
+      border: none;
+      background: transparent;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      color: var(--text);
+      width: 100%;
+      outline: none;
+      cursor: text;
+    }
+    .editable::placeholder { color: var(--faint); font-style: italic; }
+    .editable:focus { border-bottom: 1px dashed var(--accent); }
+
+    /* ── Divider ── */
+    hr { border: none; border-top: 1px solid var(--border); margin: 0.5rem 0 2rem; }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      font-size: 11px;
+      color: var(--faint);
+      font-weight: 300;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <div class="header fade">
+    <div>
+      <h1>Guten Morgen, <em>Niklas</em></h1>
+      <p class="sub">Persönliches Dashboard</p>
+    </div>
+    <div class="date-pill" id="datebadge"></div>
+  </div>
+
+  <!-- STATS -->
+  <div class="label fade">Übersicht</div>
+  <div class="stats-grid fade">
+    <div class="stat">
+      <div class="stat-lbl">Studium</div>
+      <div class="stat-val">BWL</div>
+      <div class="stat-note">Abschluss Jan 2027</div>
+    </div>
+    <div class="stat">
+      <div class="stat-lbl">Neue Rolle</div>
+      <div class="stat-val">MDM</div>
+      <div class="stat-note">Go-live Jun 2026</div>
+    </div>
+    <div class="stat">
+      <div class="stat-lbl">Lobo</div>
+      <div class="stat-val"><span class="dot warn"></span>🐕</div>
+      <div class="stat-note">Gesundheit beobachten</div>
+    </div>
+    <div class="stat">
+      <div class="stat-lbl">Motorrad</div>
+      <div class="stat-val">Klasse A</div>
+      <div class="stat-note">Führerschein in Planung</div>
+    </div>
+  </div>
+
+  <!-- PAGE CARDS -->
+  <div class="label fade">Meine Notion-Seiten</div>
+  <div class="cards-grid fade">
+
+    <a class="card" href="DEIN-NOTION-LINK-STUDIUM" target="_blank">
+      <div class="card-icon">📚</div>
+      <div class="card-title">Studium & Thesis</div>
+      <div class="card-desc">BWL Bachelor, Bachelorarbeit ERP/KMU, Prüfungen</div>
+      <span class="tag tb">Jan 2027</span>
+    </a>
+
+    <a class="card" href="DEIN-NOTION-LINK-INVESTMENTS" target="_blank">
+      <div class="card-icon">📈</div>
+      <div class="card-title">Aktienanalyse</div>
+      <div class="card-desc">DCF-Modelle, Moat-Framework, adidas, Elmos & Watchlist</div>
+      <span class="tag tg">Investments</span>
+    </a>
+
+    <a class="card" href="DEIN-NOTION-LINK-ARBEIT" target="_blank">
+      <div class="card-icon">⚙️</div>
+      <div class="card-title">Arbeit & D365</div>
+      <div class="card-desc">MDM-Rolle, Datenmigration, Hitachi-Projekt</div>
+      <span class="tag tw">Go-live Jun</span>
+    </a>
+
+    <a class="card" href="DEIN-NOTION-LINK-LOBO" target="_blank">
+      <div class="card-icon">🐕</div>
+      <div class="card-title">Lobo</div>
+      <div class="card-desc">Gesundheitslog, Tierarzt-Termine, Symptomverlauf</div>
+      <span class="tag tr">Aktuell</span>
+    </a>
+
+    <a class="card" href="DEIN-NOTION-LINK-MOTORRAD" target="_blank">
+      <div class="card-icon">🏍️</div>
+      <div class="card-title">Motorrad</div>
+      <div class="card-desc">Führerschein-Plan, Kawasaki Ninja 650, Kosten</div>
+      <span class="tag tw">In Planung</span>
+    </a>
+
+    <div class="card card-add">
+      <div class="card-icon">＋</div>
+      <div class="card-title">Neue Seite</div>
+      <div class="card-desc">Link eintragen & Karte kopieren</div>
+    </div>
+
+  </div>
+
+  <!-- LOBO LOG -->
+  <div class="label fade">Lobo – Schnelllog</div>
+  <div class="lobo-box fade">
+    <div class="lobo-head">
+      <div class="lobo-avatar">🐕</div>
+      <div>
+        <div class="lobo-name">Lobo</div>
+        <div class="lobo-breed">Weißer Schweizer Schäferhund</div>
+      </div>
+    </div>
+    <div class="lobo-grid">
+      <div class="lobo-item">
+        <div class="lobo-key">Letzter Tierarzt</div>
+        <input class="editable" placeholder="Datum…" />
+      </div>
+      <div class="lobo-item">
+        <div class="lobo-key">Nächster Termin</div>
+        <input class="editable" placeholder="Datum…" />
+      </div>
+      <div class="lobo-item">
+        <div class="lobo-key">Aktuelle Symptome</div>
+        <input class="editable" placeholder="Notiz…" />
+      </div>
+      <div class="lobo-item">
+        <div class="lobo-key">Medikamente</div>
+        <input class="editable" placeholder="Notiz…" />
+      </div>
+      <div class="lobo-item">
+        <div class="lobo-key">Gewicht</div>
+        <input class="editable" placeholder="kg…" />
+      </div>
+      <div class="lobo-item">
+        <div class="lobo-key">Status</div>
+        <div class="lobo-val"><span class="dot warn"></span>Beobachtung</div>
+      </div>
+    </div>
+  </div>
+
+  <footer>Niklas · Persönliches Dashboard · <span id="yr"></span></footer>
+
+  <script>
+    const d = new Date();
+    document.getElementById('datebadge').textContent =
+      d.toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' });
+    document.getElementById('yr').textContent = d.getFullYear();
+  </script>
+</body>
+</html>
