@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #f5f0e8;
+      --surface: #faf6ee;
+      --card:    #ede5d0;
+      --border:  #d4c9b0;
+      --accent:  #c4a870;
+      --text:    #2c2318;
+      --muted:   #8a7660;
+      --faint:   #a08c70;
+      --tag-warm-bg: #e8d5b0; --tag-warm-fg: #6b4f28;
+      --tag-green-bg:#d4e8c8; --tag-green-fg:#3b5e2a;
+      --tag-blue-bg: #c8d8e8; --tag-blue-fg: #2a4060;
+      --tag-red-bg:  #e8ccc8; --tag-red-fg:  #6b2a28;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2.5rem 2rem 3rem;
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    body > * { position: relative; z-index: 1; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .fade { animation: fadeUp 0.5s ease both; }
+    .fade:nth-child(1) { animation-delay: 0s; }
+    .fade:nth-child(2) { animation-delay: 0.07s; }
+    .fade:nth-child(3) { animation-delay: 0.14s; }
+    .fade:nth-child(4) { animation-delay: 0.21s; }
+    .fade:nth-child(5) { animation-delay: 0.28s; }
+
+    .header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 2.25rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .header h1 {
+      font-family: 'Lora', serif;
+      font-size: 30px;
+      font-weight: 400;
+      letter-spacing: -0.4px;
+      line-height: 1.2;
+    }
+    .header h1 em { font-style: italic; color: var(--muted); }
+    .header .sub { font-size: 13px; color: var(--muted); margin-top: 5px; font-weight: 300; }
+    .date-pill {
+      font-size: 12px;
+      color: var(--muted);
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 6px 14px;
+      border-radius: 20px;
+      white-space: nowrap;
+      margin-top: 4px;
+    }
+
+    .label {
+      font-size: 10.5px;
+      font-weight: 500;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.8rem;
+    }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+      gap: 12px;
+      margin-bottom: 2.25rem;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      padding: 20px 18px;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      transition: background 0.15s, border-color 0.15s, transform 0.15s;
+    }
+    .card:hover {
+      background: #f0e8d4;
+      border-color: var(--accent);
+      transform: translateY(-3px);
+    }
+    .card-icon { font-size: 24px; margin-bottom: 12px; line-height: 1; }
+    .card-title {
+      font-family: 'Lora', serif;
+      font-size: 15.5px;
+      font-weight: 400;
+      margin-bottom: 5px;
+    }
+    .card-desc {
+      font-size: 11.5px;
+      color: var(--muted);
+      line-height: 1.55;
+      font-weight: 300;
+      flex: 1;
+    }
+    .tag {
+      display: inline-block;
+      margin-top: 12px;
+      font-size: 10px;
+      font-weight: 500;
+      padding: 3px 9px;
+      border-radius: 20px;
+      width: fit-content;
+    }
+    .tw { background: var(--tag-warm-bg);  color: var(--tag-warm-fg); }
+    .tg { background: var(--tag-green-bg); color: var(--tag-green-fg); }
+    .tb { background: var(--tag-blue-bg);  color: var(--tag-blue-fg); }
+    .tr { background: var(--tag-red-bg);   color: var(--tag-red-fg); }
+
+    .card-add {
+      border-style: dashed;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      cursor: default;
+      opacity: 0.5;
+    }
+    .card-add .card-title { color: var(--muted); font-size: 14px; }
+
+    footer {
+      text-align: center;
+      font-size: 11px;
+      color: var(--faint);
+      font-weight: 300;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header fade">
+    <div>
+      <h1>Mein <em>Dashboard</em></h1>
+      <p class="sub">Schnellzugriff auf alle Seiten</p>
+    </div>
+    <div class="date-pill" id="datebadge"></div>
+  </div>
+
+  <div class="label fade">Meine Seiten</div>
+  <div class="cards-grid fade">
+
+    <a class="card" href="NOTION-LINK-STUDIUM" target="_blank">
+      <div class="card-icon">📚</div>
+      <div class="card-title">Studium</div>
+      <div class="card-desc">Vorlesungen, Prüfungen, Bachelorarbeit</div>
+      <span class="tag tb">Uni</span>
+    </a>
+
+    <a class="card" href="NOTION-LINK-INVESTMENTS" target="_blank">
+      <div class="card-icon">📈</div>
+      <div class="card-title">Investments</div>
+      <div class="card-desc">Aktienanalyse, Watchlist, DCF-Modelle</div>
+      <span class="tag tg">Finanzen</span>
+    </a>
+
+    <a class="card" href="NOTION-LINK-ARBEIT" target="_blank">
+      <div class="card-icon">⚙️</div>
+      <div class="card-title">Arbeit</div>
+      <div class="card-desc">Projekte, Aufgaben, Notizen</div>
+      <span class="tag tw">Job</span>
+    </a>
+
+    <a class="card" href="NOTION-LINK-LOBO" target="_blank">
+      <div class="card-icon">🐕</div>
+      <div class="card-title">Lobo</div>
+      <div class="card-desc">Tierarzt-Termine, Gesundheitslog</div>
+      <span class="tag tr">Persönlich</span>
+    </a>
+
+    <a class="card" href="NOTION-LINK-MOTORRAD" target="_blank">
+      <div class="card-icon">🏍️</div>
+      <div class="card-title">Motorrad</div>
+      <div class="card-desc">Führerschein-Plan, Recherche</div>
+      <span class="tag tw">Persönlich</span>
+    </a>
+
+    <div class="card card-add">
+      <div class="card-icon">＋</div>
+      <div class="card-title">Neue Seite</div>
+      <div class="card-desc">Karte unten kopieren & Link eintragen</div>
+    </div>
+
+  </div>
+
+  <div class="label fade">Vorlage — zum Kopieren</div>
+  <div class="cards-grid fade">
+
+    <a class="card" href="NOTION-LINK-HIER-EINTRAGEN" target="_blank">
+      <div class="card-icon">🗂️</div>
+      <div class="card-title">Titel der Seite</div>
+      <div class="card-desc">Kurze Beschreibung was sich hier befindet</div>
+      <span class="tag tw">Kategorie</span>
+    </a>
+
+  </div>
+
+  <footer>Dashboard · <span id="yr"></span></footer>
+
+  <script>
+    const d = new Date();
+    document.getElementById('datebadge').textContent =
+      d.toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' });
+    document.getElementById('yr').textContent = d.getFullYear();
+  </script>
+</body>
+</html>
